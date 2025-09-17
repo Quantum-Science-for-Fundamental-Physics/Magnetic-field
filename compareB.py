@@ -16,8 +16,8 @@ num_loops = 8
 Rwire = (1.27/2)*1e-3
 plotGrad = True
 
-#num_loops = 1
-#num_layers = 1
+num_loops = 2
+num_layers = 10
 
 if (False):
     R = ((4.225+3/16/2)*25.4)*1e-3 #radius of innermost loop
@@ -27,9 +27,10 @@ if (False):
     num_loops = 5
     Rwire = (((3/16+0.01)*25.4)/2)*1e-3
 
-Rmin = 0.0286258
-Rmax = 0.0494919
-dMOT = 0.0292481
+Rwire = 0.0024
+Rmin = (0.0347472/2) + Rwire
+Rmax = 0.0449453 - num_loops*Rwire*2 + Rwire
+dMOT = 0.0292481 + Rwire
 
 findOpt = True
 
@@ -47,14 +48,16 @@ d = dMOT
 """
 
 def compareZ(testI, testR, testd, testWire):
-    print(testI)
-    print(testR)
-    print(testd)
-    print(testWire)
+    print("I = " + str(testI) + " A")
+    print("R = " + str(testR) + " m")
+    print("d = " + str(testd) + " m")
+    print("Rwire = " + str(testWire) + " m")
+    print(str(num_loops) + " loops per layer, " + str(num_layers) + " layers per side")
+
     Z_list = np.linspace(-.01, .01, 1000)
-    B1 = ArbitraryPointBField.plotZfield(x, y, testR, testI, testd, num_layers, num_loops, testWire, plotGrad)
+    #B1 = ArbitraryPointBField.plotZfield(x, y, testR, testI, testd, num_layers, num_loops, testWire, plotGrad)
     B2 = jupyterMOTcode.plotZ()
-    #B1 = jupyterMOTcode.plotZ2(testI, testR, testd, testWire)
+    B1 = ArbitraryPointBField.plotZfield(0, 0, testR, testI, testd, num_layers, num_loops, testWire, True)
 
     #B2 = ArbitraryPointBField.plotZfield(x, y, R, I, d, num_layers, num_loops, Rwire, plotGrad)
     #B1 = ArbitraryPointBField.plotZfield(x, y, testR, testI, testd, num_layers, num_loops, testWire, plotGrad)
@@ -150,8 +153,8 @@ def compareX():
 
 regparams = [I, R, d, Rwire]
 if (findOpt):
-    testParams = [I * (3), R * (7/4), d * (7/4), Rwire]
-    bounds = [(0, 200), (Rmin+0.001, Rmax-0.001), (dMOT+.01, dMOT+.1), (Rwire/2, Rwire*4)]
+    testParams = [39.94714571504061, 0.03299826825814786, 0.0392481, 0.0024]
+    bounds = [(0, 50), (Rmin, Rmax), (dMOT, dMOT+1), (0.0024, 0.0024)]
     result = minimize(compareZinput, x0=testParams, bounds=bounds)
     np.set_printoptions(precision=17, suppress=False)
     print(f"Result: {result.x}")

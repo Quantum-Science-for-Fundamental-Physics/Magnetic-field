@@ -23,10 +23,12 @@ def BzIntegrand(phi, x, y, z, R, I, cx, cy, cz):
     return ((mu0 * I) / (4 * np.pi)) * ((R**2 - R * (x * np.cos(phi) + y * np.sin(phi))) / (((x - R * np.cos(phi))**2 + (y - R * np.sin(phi))**2 + z**2)**(3/2)))
 
 def oneLoopField(x, y, z, R, I, cx, cy, cz):
-    Bx  = quad(BxIntegrand, 0, 2 * np.pi, args=(x, y, z, R, I, cx, cy, cz))[0]
-    By  = quad(ByIntegrand, 0, 2 * np.pi, args=(x, y, z, R, I, cx, cy, cz))[0]
-    Bz = quad(BzIntegrand, 0, 2 * np.pi, args=(x, y, z, R, I, cx, cy, cz))[0]
-    #Bz = mu0 * I * R**2 / (2*(R**2+((x-cx)**2 + (y-cy)**2 + (z-cz)**2))**(3/2))
+    #Bx  = quad(BxIntegrand, 0, 2 * np.pi, args=(x, y, z, R, I, cx, cy, cz))[0]
+    #By  = quad(ByIntegrand, 0, 2 * np.pi, args=(x, y, z, R, I, cx, cy, cz))[0]
+    #Bz = quad(BzIntegrand, 0, 2 * np.pi, args=(x, y, z, R, I, cx, cy, cz))[0]
+    Bx = 0
+    By = 0
+    Bz = mu0 * I * R**2 / (2*(R**2+((x-cx)**2 + (y-cy)**2 + (z-cz)**2))**(3/2))
 
     Bx *= 1e4
     By *= 1e4
@@ -135,25 +137,31 @@ def plotZfield(x, y, R, I, d, num_layers, num_loops, Rwire, plotGrad):
         else:
             B_list.append(np.linalg.norm(B))
         Bz_list.append(B[2])
-
+    return Bz_list
     grad = np.gradient(B_list, Z_list[1] - Z_list[0])
     zGrad = np.gradient(Bz_list, Z_list[1] - Z_list[0])
 
     for i in range (len(zGrad)):
         zGrad[i] = zGrad[i]/100
         grad[i] = grad[i]/100
-    return Bz_list
+    #return Bz_list
+    print(zGrad[500])
+    print(Bz_list[500] - Bz_list[0])
+    fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+    axes[0].plot(Z_list, Bz_list, label="Bz")
+    axes[0].set_xlabel("z")
+    axes[0].set_title("B field VS z")
+
+    axes[0].legend()
+    axes[0].grid(True)
     
-    plt.figure()
-    #plt.plot(Z_list, B_list, label="B")
-    #plt.plot(Z_list, Bz_list, label="Bz")
-    if (plotGrad):
-        plt.plot(Z_list, grad, label="dB/dz")
-        plt.plot(Z_list, zGrad, label="Gradient")
-    plt.xlabel("z")
-    plt.title("B field and gradient VS z")
+    axes[1].plot(Z_list, zGrad, label="Gradient")
+    axes[1].set_xlabel("z")
+    plt.title("Gradient VS z")
+    
     plt.legend()
     plt.grid(True)
+    plt.tight_layout()
     plt.show()
 
 def plotXfield(y, z, R, I, d, num_layers, num_loops, Rwire, plotGrad):
@@ -263,10 +271,11 @@ if __name__ == "__main__":
     x = 0
     y = 0
     z = 0.0001
-    R = 3.31595*1e-2 #radius of innermost loop
-    I = 20.336 #amps
-    d = 3.96226*1e-2 #d/2 to closest layer, center of wire
-    num_layers = 4 #stacked vertically
+    R = 0.1778 #radius of innermost loop
+    I = 165 #amps
+    d = 0.03730625
+    R = 0.0889
+    num_layers = 14 #stacked vertically
     num_loops = 8
-    Rwire = 0.6616*1e-3
-    fieldVSwireRadius(x, y, z, R, I, d, num_layers, num_loops)
+    Rwire = 0.0028
+    plotZfield(x, y, R, I, d, num_layers, num_loops, Rwire, True)
